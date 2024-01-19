@@ -8,7 +8,6 @@ function displayProducts(categories) {
         categories.forEach((each) => {
             console.log(each);
             const productItem = document.createElement("li");
-            productItem.dataset.category = each.category_name;
             each.category_products.map((product) => {
                 const discountAmount = product.compare_at_price - product.price;
                 const discountPercentage = Math.floor(
@@ -18,13 +17,17 @@ function displayProducts(categories) {
                 console.log(each.category_name);
                 productItem.classList.add("product-item");
                 products.appendChild(productItem);
+                const Container = document.createElement("div")
+                Container.classList.add("product-container")
+                Container.dataset.category = each.category_name;
+                productItem.appendChild(Container)
                 const Image = document.createElement("img");
                 Image.classList.add("image");
                 Image.src = product.image;
-                productItem.appendChild(Image);
+                Container.appendChild(Image);
                 const productDataContainer = document.createElement("div");
                 productDataContainer.classList.add("product-data");
-                productItem.appendChild(productDataContainer);
+                Container.appendChild(productDataContainer);
                 const badge = document.createElement("p");
                 badge.textContent = product.badge_text;
                 badge.classList.add("title");
@@ -81,15 +84,15 @@ async function getProductsData() {
                     (each) => each.category_name === selectedCatagory
                 );
                 displayProducts(filters);
-                const allProducts = document.querySelectorAll(
-                    ".products-list .product-item"
-                );
+                const allProducts = document.querySelectorAll(".product-item .product-container");
+                console.log(allProducts)                
                 allProducts.forEach((each) => {
                     each.classList.add("hide-element");
 
                     if (each.dataset.category === selectedCatagory) {
                         console.log(each.dataset.category);
                         each.classList.remove("hide-element");
+
                     }
                 });
             });
