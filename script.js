@@ -1,78 +1,102 @@
-let categoriesContainer = document.getElementById("categoriesContainer");
-let search = "m"
-const apiUrl =
-  `https://cdn.shopify.com/s/files/1/0564/3685/0790/files/multiProduct.json`;
-async function Categories(data) {
-  data.categories.forEach((each) => {
-    const button = document.createElement("button");
-    button.textContent = each.category_name;
-    button.classList.add("button");
-    document.getElementById("categoriesContainer").appendChild(button);
-  });
-}
+let categoriesContainer = document.querySelector(".categories-container");
+const products = document.getElementById("products");
+
+const apiUrl = `https://cdn.shopify.com/s/files/1/0564/3685/0790/files/multiProduct.json`;
 
 function displayProducts(categories) {
-  if (categories.length > 0) {
-    categories.map((each) => {
-      each.category_products.map((product) => {
-        const productItem = document.createElement("li");
-        productItem.classList.add("product-item");
-        productItem.id = product.key;
-        document.getElementById("products").appendChild(productItem);
-        const Image = document.createElement("img");
-        Image.classList.add("image");
-        Image.src = product.image;
-        productItem.appendChild(Image);
-        const Title = document.createElement("h1");
-        Title.textContent = product.title;
-        Title.classList.add("title");
-        productItem.appendChild(Title);
-        const priceDetails = document.createElement("div");
-        priceDetails.classList.add("price-details");
-        productItem.appendChild(priceDetails);
-        const price = document.createElement("p");
-        price.textContent = product.price;
-        price.classList.add("price");
-        priceDetails.appendChild(price);
-        const comparePrice = document.createElement("p");
-        comparePrice.textContent = product.compare_at_price;
-        comparePrice.classList.add("compare-price");
-        priceDetails.appendChild(comparePrice);
-        const Vendor = document.createElement("p");
-        Vendor.textContent = `Sold By ${product.vendor}`;
-        price.classList.add("vendor");
-        productItem.appendChild(Vendor);
-        const addToCartButton = document.createElement("button");
-        addToCartButton.textContent = "Add to Cart";
-        addToCartButton.classList.add("add-to-cart");
-        productItem.appendChild(addToCartButton);
-      });
-    });
-  }
-}
-let filteredResults;
-async function getProductsData() {
-  try {
-    let response = await fetch(apiUrl);
-    if (response.ok === true) {
-      let jsonData = await response.json();
-      const { categories } = jsonData;
-      console.log(categories)
-      const categoriesList = categories.map((product) => product.category_name);
-      console.log(categoriesList);
-      categoriesContainer.innerHTML = categoriesList
-        .map((each) => `<button>${each}</button>`)
-        .join("");
-      categoriesContainer.addEventListener("click", (e) => {
-        let selectedCatagory = e.target.textContent;
-        console.log(selectedCatagory);
-        displayProducts(categories.filter((each)=> each.category_name == selectedCatagory))
-        
-      });
+    if (categories.length > 0) {
+        categories.forEach((each) => {
+            console.log(each);
+            const productItem = document.createElement("li");
+            productItem.dataset.category = each.category_name;
+            each.category_products.map((product) => {
+                const discountAmount = product.compare_at_price - product.price;
+                const discountPercentage = Math.floor(
+                    (discountAmount / product.compare_at_price) * 100
+                );
+                console.log(categories);
+                console.log(each.category_name);
+                productItem.classList.add("product-item");
+                products.appendChild(productItem);
+                const Image = document.createElement("img");
+                Image.classList.add("image");
+                Image.src = product.image;
+                productItem.appendChild(Image);
+                const productDataContainer = document.createElement("div");
+                productDataContainer.classList.add("product-data");
+                productItem.appendChild(productDataContainer);
+                const badge = document.createElement("p");
+                badge.textContent = product.badge_text;
+                badge.classList.add("title");
+                productDataContainer.appendChild(badge);
+
+                const Title = document.createElement("h1");
+                Title.textContent = product.title;
+                Title.classList.add("title");
+                productDataContainer.appendChild(Title);
+                const Price = document.createElement("p");
+                Price.textContent = product.price;
+                Price.classList.add("price");
+                productDataContainer.appendChild(Price);
+                const ComparePrice = document.createElement("p");
+                ComparePrice.textContent = product.compare_at_price;
+                ComparePrice.classList.add("compare-price");
+                productDataContainer.appendChild(ComparePrice);
+                const Vendor = document.createElement("p");
+                Vendor.textContent = `Sold By ${product.vendor}`;
+                Vendor.classList.add("vendor");
+                productDataContainer.appendChild(Vendor);
+                const Discount = document.createElement("p");
+                Discount.textContent = `${discountPercentage}% Off`;
+                Discount.classList.add("discount");
+                productDataContainer.appendChild(Discount);
+                const addToCartButton = document.createElement("button");
+                addToCartButton.textContent = "Add to Cart";
+                addToCartButton.classList.add("add-to-cart");
+                productDataContainer.appendChild(addToCartButton);
+            });
+        });
     }
-     
-  } catch (e) {
-    console.log(e);
-  }
+}
+async function getProductsData() {
+    try {
+        let response = await fetch(apiUrl);
+        if (response.ok === true) {
+            let jsonData = await response.json();
+            const {
+                categories
+            } = jsonData;
+            const categoriesList = categories.map((product) => product.category_name);
+            categoriesList.forEach((each) => {
+                const button = document.createElement("button");
+                button.classList.add("button");
+                button.textContent = each;
+                categoriesContainer.appendChild(button);
+            });
+            categoriesContainer.addEventListener("click", (event) => {
+                const selectedCatagory = event.target.textContent;
+                document.querySelector(".active-class")?.classList.remove("active-class");
+                event.target.classList.add("active-class");
+                const filters = categories.filter(
+                    (each) => each.category_name === selectedCatagory
+                );
+                displayProducts(filters);
+                const allProducts = document.querySelectorAll(
+                    ".products-list .product-item"
+                );
+                allProducts.forEach((each) => {
+                    each.classList.add("hide-element");
+
+                    if (each.dataset.category === selectedCatagory) {
+                        console.log(each.dataset.category);
+                        each.classList.remove("hide-element");
+                    }
+                });
+            });
+
+        }
+    } catch (e) {
+        console.log(e);
+    }
 }
 getProductsData();
