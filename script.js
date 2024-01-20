@@ -17,10 +17,10 @@ function displayProducts(categories) {
                 console.log(each.category_name);
                 productItem.classList.add("product-item");
                 products.appendChild(productItem);
-                const Container = document.createElement("div")
-                Container.classList.add("product-container")
+                const Container = document.createElement("div");
+                Container.classList.add("product-container");
                 Container.dataset.category = each.category_name;
-                productItem.appendChild(Container)
+                productItem.appendChild(Container);
                 const Image = document.createElement("img");
                 Image.classList.add("image");
                 Image.src = product.image;
@@ -30,7 +30,7 @@ function displayProducts(categories) {
                 Container.appendChild(productDataContainer);
                 const badge = document.createElement("p");
                 badge.textContent = product.badge_text;
-                badge.classList.add("title");
+                badge.classList.add("badge");
                 productDataContainer.appendChild(badge);
 
                 const Title = document.createElement("h1");
@@ -76,27 +76,37 @@ async function getProductsData() {
                 button.textContent = each;
                 categoriesContainer.appendChild(button);
             });
-            categoriesContainer.addEventListener("click", (event) => {
-                const selectedCatagory = event.target.textContent;
-                document.querySelector(".active-class")?.classList.remove("active-class");
-                event.target.classList.add("active-class");
-                const filters = categories.filter(
-                    (each) => each.category_name === selectedCatagory
-                );
-                displayProducts(filters);
-                const allProducts = document.querySelectorAll(".product-item .product-container");
-                console.log(allProducts)                
-                allProducts.forEach((each) => {
-                    each.classList.add("hide-element");
+            const categoryButtons = document.querySelectorAll("button");
+            console.log(categoryButtons);
+            categoryButtons.forEach((each) => {
+                each.addEventListener("click", function(event) {
+                    const selectedCatagory = event.target.textContent;
+                    const aciveElement = document.querySelector(".active-class");
+                    aciveElement ? aciveElement.classList.remove("active-class") : "";
 
-                    if (each.dataset.category === selectedCatagory) {
-                        console.log(each.dataset.category);
-                        each.classList.remove("hide-element");
+                    event.target.classList.add("active-class");
+                    const filters = categories.filter(
+                        (each) => each.category_name === selectedCatagory
+                    );
+                    displayProducts(filters);
+                    const allProducts = document.querySelectorAll(".product-container");
+                    console.log(allProducts);
+                    let Elements = Array.from(allProducts);
 
-                    }
+                    Elements.forEach((each) => {
+                        each.classList.add("hide-element");
+
+                        if (each.dataset.category === selectedCatagory) {
+                            console.log(each.dataset.category);
+                            each.classList.remove("hide-element");
+
+                        }
+                    });
+
                 });
             });
-
+            // categoriesContainer.addEventListener("click", (event) => {
+            //     });
         }
     } catch (e) {
         console.log(e);
